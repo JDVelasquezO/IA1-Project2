@@ -8,13 +8,21 @@ document.getElementById("predictBtn").addEventListener("click", function() {
     linear.fit(xTrain, yTrain);
     let yPredict = linear.predict(xTrain);
     document.getElementById("info").innerHTML = `
-        <table id="displayTable" class="table">
-            <tr>
-                <th>X Base</th>
-                <th>Y Predicted</th>
-                <th>Error %</th>
-            </tr>
-        </table>
+        <div class="columns">
+            <div class="column">
+                <table id="displayTable" class="table is-bordered">
+                    <tr>
+                        <th>X Base</th>
+                        <th>Y Predicted</th>
+                        <th>Error %</th>
+                    </tr>
+                </table>
+            </div>
+            <div class="column">
+                <h2>Gráfica</h2>
+                <div id="curve_chart" style='width: 900px; height: 500px'></div>
+            </div>
+        </div>
     `;
 
     let displayTable = document.getElementById("displayTable");
@@ -37,6 +45,31 @@ document.getElementById("predictBtn").addEventListener("click", function() {
         row.appendChild(yCol);
         row.appendChild(errCol);
         displayTable.appendChild(row);
+    }
+
+    let graphDataSet = [];
+    graphDataSet.push(["X", "Y", "Predicted"]);
+    for (let i = 0; i < xTrain.length; i++) {
+        const x = xTrain[i];
+        graphDataSet.push([x.toString(), yTrain[i], yPredict[i]]);
+    }
+
+    google.charts.load("current", { packages: ['corechart'] });
+    google.charts.setOnLoadCallback(drawChart);
+
+    function drawChart() {
+        let data = google.visualization.arrayToDataTable(graphDataSet);
+
+        let options = {
+            title: "Linear Regression",
+            legend: { position: "bottom" },
+        };
+
+        let chart = new google.visualization.LineChart(
+            document.getElementById("curve_chart")
+        );
+
+        chart.draw(data, options);
     }
 });
 
