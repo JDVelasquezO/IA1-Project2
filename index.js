@@ -1,15 +1,26 @@
 let csvLoaded = {};
 let xTrainGlobal = [];
 let yTrainGlobal = [];
+let xPredictGlobal = [];
+let option = document.getElementById("select");
 
 document.getElementById("predictBtn").addEventListener("click", function() {
+    if (parseInt(option.value) === 1) {
+        linear();
+    } else if (parseInt(option.value) === 2) {
+        polynomial();
+    }
+});
+
+const linear = () => {
+    console.log(option.value);
     let [ xTrain, yTrain ] = arrayCsv(csvLoaded);
     let linear = new LinearRegression();
     linear.fit(xTrain, yTrain);
     let yPredict = linear.predict(xTrain);
     document.getElementById("info").innerHTML = `
-        <div class="columns">
-            <div class="column">
+        <div>
+            <div>
                 <table id="displayTable" class="table is-bordered">
                     <tr>
                         <th>X Base</th>
@@ -18,7 +29,7 @@ document.getElementById("predictBtn").addEventListener("click", function() {
                     </tr>
                 </table>
             </div>
-            <div class="column">
+            <div class="mt-3">
                 <h2>Gráfica</h2>
                 <div id="curve_chart" style='width: 900px; height: 500px'></div>
             </div>
@@ -71,7 +82,76 @@ document.getElementById("predictBtn").addEventListener("click", function() {
 
         chart.draw(data, options);
     }
-});
+}
+
+const polynomial = () => {
+    function joinArrays() {
+        let a = [];
+        if (arguments.length === 10) {
+            a.push([arguments[0], arguments[2], arguments[4], arguments[6], arguments[8]]);
+            for (let i = 0; i < arguments[1].length; i++) {
+                a.push([arguments[1][i], arguments[3][i], arguments[5][i], arguments[7][i], arguments[9][i]]);
+            }
+        }
+        return a;
+    }
+
+    let [ xTrain, yTrain, predictedArray ] = arrayCsv(csvLoaded);
+    let polynomial = new PolynomialRegression();
+    polynomial.fit(xTrain, yTrain, 2);
+
+    let yPredict = polynomial.predict(predictedArray);
+    let r2 = polynomial.getError();
+
+    polynomial.fit(xTrain, yTrain, 3);
+    let yPredict2 = polynomial.predict(predictedArray);
+    let r22 = polynomial.getError();
+
+    polynomial.fit(xTrain, yTrain, 4);
+    let yPredict3 = polynomial.predict(predictedArray);
+    let r23 = polynomial.getError();
+
+    for (let i = 0; i < predictedArray.length; i++) {
+        yPredict[i] = Number(yPredict[i].toFixed(2));
+        yPredict2[i] = Number(yPredict2[i].toFixed(2));
+        yPredict3[i] = Number(yPredict3[i].toFixed(2));
+    }
+
+    document.getElementById("info").innerHTML += 'X Train: [' + xTrain + '] <br/>';
+    document.getElementById("info").innerHTML += 'Y Train: [' + yTrain + '] <br/>';
+    document.getElementById("info").innerHTML += 'X To Predict: [' + predictedArray + '] <br/>';
+    document.getElementById("info").innerHTML += 'Y Prediction Degree 2: [' + yPredict + '] <br/>';
+    document.getElementById("info").innerHTML += 'Y Prediction Degree 3: [' + yPredict2 + '] <br/>';
+    document.getElementById("info").innerHTML += 'Y Prediction Degree 4: [' + yPredict3 + '] <br/>';
+    document.getElementById("info").innerHTML += 'R^2 for Degree 2: ' + Number(r2.toFixed(2)) + '<br/>';
+    document.getElementById("info").innerHTML += 'R^2 for Degree 3: ' + Number(r22.toFixed(2)) + '<br/>';
+    document.getElementById("info").innerHTML += 'R^2 for Degree 4: ' + Number(r23.toFixed(2)) + '<br/>';
+    document.getElementById("info").innerHTML += `
+        <div class="mt-3">
+            <h2>Gráfica</h2>
+            <div id="curve_chart" style='width: 900px; height: 500px'></div>
+        </div>
+    `;
+
+    let a = joinArrays('x', xTrain, 'Training', yTrain, 'Prediction Degree 2', yPredict, 'Prediction Degree 3', yPredict2, 'Prediction Degree 4', yPredict3);
+
+    google.charts.load('current', { 'packages': ['corechart'] });
+    google.charts.setOnLoadCallback(drawChart);
+
+    function drawChart() {
+        let data = google.visualization.arrayToDataTable(a);
+        let options = {
+            seriesType: 'scatter',
+            series: {
+                1: { type: 'line' },
+                2: { type: 'line' },
+                3: { type: 'line' }
+            }
+        };
+        let chart = new google.visualization.ComboChart(document.getElementById('curve_chart'));
+        chart.draw(data, options);
+    }
+}
 
 document.getElementById("csvForm").addEventListener("submit", function(e) {
     e.preventDefault();
@@ -104,9 +184,13 @@ function arrayCsv(fileCsv) {
     for (let i = 0; i < fileCsv.length; i++) {
         xTrainGlobal[i] = parseFloat(fileCsv[i][Object.keys(fileCsv[i])[0]]);
         yTrainGlobal[i] = parseFloat(fileCsv[i][Object.keys(fileCsv[i])[1]]);
+        if (parseFloat(fileCsv[i][Object.keys(fileCsv[i])[2]]) != null) {
+            xPredictGlobal[i] = parseFloat(fileCsv[i][Object.keys(fileCsv[i])[2]]);
+        }
     }
 
     console.log(xTrainGlobal);
     console.log(yTrainGlobal);
-    return [xTrainGlobal, yTrainGlobal];
+    console.log(xPredictGlobal);
+    return [xTrainGlobal, yTrainGlobal, xPredictGlobal];
 }
