@@ -153,6 +153,10 @@ const polynomial = () => {
     }
 }
 
+const decisionTree = () => {
+
+}
+
 document.getElementById("csvForm").addEventListener("submit", function(e) {
     e.preventDefault();
     const file = document.getElementById("btnCsv").files[0];
@@ -194,3 +198,7 @@ function arrayCsv(fileCsv) {
     console.log(xPredictGlobal);
     return [xTrainGlobal, yTrainGlobal, xPredictGlobal];
 }
+
+document.getElementById("resetBtn").addEventListener("click", function () {
+    location.reload();
+})
