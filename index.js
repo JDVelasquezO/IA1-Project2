@@ -1,19 +1,20 @@
 let csvLoaded = {};
-let xTrainGlobal = [];
-let yTrainGlobal = [];
-let xPredictGlobal = [];
+let paramTemp = [];
+let globalParams = [];
 let option = document.getElementById("select");
+let paramsTree = document.getElementById("inputTree");
 
 document.getElementById("predictBtn").addEventListener("click", function() {
     if (parseInt(option.value) === 1) {
         linear();
     } else if (parseInt(option.value) === 2) {
         polynomial();
+    } else if (parseInt(option.value) === 3) {
+        decisionTree();
     }
 });
 
 const linear = () => {
-    console.log(option.value);
     let [ xTrain, yTrain ] = arrayCsv(csvLoaded);
     let linear = new LinearRegression();
     linear.fit(xTrain, yTrain);
@@ -185,18 +186,17 @@ function csvToArr(stringVal, splitter) {
 }
 
 function arrayCsv(fileCsv) {
-    for (let i = 0; i < fileCsv.length; i++) {
-        xTrainGlobal[i] = parseFloat(fileCsv[i][Object.keys(fileCsv[i])[0]]);
-        yTrainGlobal[i] = parseFloat(fileCsv[i][Object.keys(fileCsv[i])[1]]);
-        if (parseFloat(fileCsv[i][Object.keys(fileCsv[i])[2]]) != null) {
-            xPredictGlobal[i] = parseFloat(fileCsv[i][Object.keys(fileCsv[i])[2]]);
+    for (let j = 0; j < Object.keys(fileCsv[0]).length; j++) {
+        for (let i = 0; i < fileCsv.length; i++) {
+            paramTemp[i] = parseFloat(fileCsv[i][Object.keys(fileCsv[i])[j]]);
+            // console.log(paramTemp[i]);
         }
+        globalParams[j] = paramTemp;
+        paramTemp = [];
     }
 
-    console.log(xTrainGlobal);
-    console.log(yTrainGlobal);
-    console.log(xPredictGlobal);
-    return [xTrainGlobal, yTrainGlobal, xPredictGlobal];
+    console.log(globalParams);
+    return globalParams;
 }
 
 document.getElementById("resetBtn").addEventListener("click", function () {
