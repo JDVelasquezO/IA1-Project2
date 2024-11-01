@@ -59,12 +59,24 @@
                     </div>
                 </div>
 
-                <input
-                        id="inputTree"
-                        class="input is-info"
-                        type="text"
-                        placeholder="Parámetros para decision tree separados por coma"
-                /><label for="inputTree">Ej. Medium,Short,No,Yes,No</label>
+                <div class="columns">
+                    <div class="column">
+                        <input
+                                id="headerTree"
+                                class="input is-info"
+                                type="text"
+                                placeholder="Encabezados para decision tree separados por coma"
+                        /><label for="headerTree">Ej. Income,WorkTime,Married,Debts,Children,BuyHouse</label>
+                    </div>
+                    <div class="column">
+                        <input
+                                id="inputTree"
+                                class="input is-info"
+                                type="text"
+                                placeholder="Parámetros para decision tree separados por coma"
+                        /><label for="inputTree">Ej. Medium,Short,No,Yes,No</label>
+                    </div>
+                </div>
 
                 <div class="columns mt-5 p-3">
                     <button id="predictBtn" class="button m-1 is-primary is-dark">Predicción</button>

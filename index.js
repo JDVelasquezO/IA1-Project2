@@ -3,6 +3,7 @@ let paramTemp = [];
 let globalParams = [];
 let option = document.getElementById("select");
 let paramsTree = document.getElementById("inputTree");
+let headerTree = document.getElementById("headerTree");
 
 document.getElementById("predictBtn").addEventListener("click", function() {
     if (parseInt(option.value) === 1) {
@@ -155,7 +156,71 @@ const polynomial = () => {
 }
 
 const decisionTree = () => {
+    const generatechart = () => {
+        let [...arrays] = arrayCsv(csvLoaded);
+        let arrTraining = transpose(arrays);
+        let headers = headerTree.value;
+        let arrHeader = headers.split(",");
+        let arrData = [arrHeader];
+        arrData.push(...arrTraining);
+        console.log(arrData);
+        let dTree = new DecisionTreeID3(arrData);
+        let root = dTree.train(dTree.dataset);
+        let pred = paramsTree.value;
+        let arrPred = pred.split(",");
+        let predHeader = [];
+        for (let i = 0; i < arrHeader.length - 1; i++) {
+            predHeader.push(arrHeader[i]);
+        }
+        let predict = pred !== "" ? dTree.predict([predHeader, arrPred], root) : null;
+        return {
+            dotStr: dTree.generateDotString(root),
+            predictNode: predict
+        };
+    }
 
+    const transpose = (matrix) => {
+        let [row] = matrix
+        return row.map((value, column) => matrix.map(row => row[column]))
+    }
+
+    document.getElementById("info").innerHTML = `
+        <p id="prediction" style="font-size: 20px;"></p>
+        <div 
+        style="width: 100%; height: 500px; border: 2px solid rgb(96, 160, 255); border-radius: 10px;" 
+        id="treed"></div>
+    `;
+
+    let chart = document.getElementById("treed");
+    let {
+        dotStr,
+        predictNode
+    } = generatechart();
+    if (predictNode != null) {
+        let header = document.getElementById('headerTree').value;
+        let arrHeader = header.split(",");
+        document.getElementById('prediction').innerText = arrHeader[arrHeader.length - 1] + ": " + predictNode.value;
+    } else {
+        document.getElementById('prediction').innerText = "";
+    }
+    let parsDot = vis.network.convertDot(dotStr);
+    let data = {
+        nodes: parsDot.nodes,
+        edges: parsDot.edges
+    }
+    let options = {
+        layout: {
+            hierarchical: {
+                levelSeparation: 100,
+                nodeSpacing: 100,
+                parentCentralization: true,
+                direction: 'UD', // UD, DU, LR, RL
+                sortMethod: 'directed', // hubsize, directed
+                //shakeTowards: 'roots' // roots, leaves
+            },
+        },
+    };
+    let network = new vis.Network(chart, data, options);
 }
 
 document.getElementById("csvForm").addEventListener("submit", function(e) {
@@ -188,14 +253,17 @@ function csvToArr(stringVal, splitter) {
 function arrayCsv(fileCsv) {
     for (let j = 0; j < Object.keys(fileCsv[0]).length; j++) {
         for (let i = 0; i < fileCsv.length; i++) {
-            paramTemp[i] = parseFloat(fileCsv[i][Object.keys(fileCsv[i])[j]]);
-            // console.log(paramTemp[i]);
+            if (!isNaN(parseFloat(fileCsv[i][Object.keys(fileCsv[i])[j]]))) {
+                paramTemp[i] = parseFloat(fileCsv[i][Object.keys(fileCsv[i])[j]]);
+            } else {
+                paramTemp[i] = fileCsv[i][Object.keys(fileCsv[i])[j]];
+            }
         }
         globalParams[j] = paramTemp;
         paramTemp = [];
     }
 
-    console.log(globalParams);
+    // console.log(globalParams);
     return globalParams;
 }
 
