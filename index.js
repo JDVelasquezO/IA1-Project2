@@ -98,7 +98,8 @@ const polynomial = () => {
         return a;
     }
 
-    let [ xTrain, yTrain, predictedArray ] = arrayCsv(csvLoaded);
+    let predictedArray = document.getElementById("paramsPolinomial").value.split(",");
+    let [ xTrain, yTrain ] = arrayCsv(csvLoaded);
     let polynomial = new PolynomialRegression();
     polynomial.fit(xTrain, yTrain, 2);
 
